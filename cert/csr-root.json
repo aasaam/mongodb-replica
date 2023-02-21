@@ -1,0 +1,10 @@
+{
+  "CN": "__NAMESPACE__ MongoDB Replication Private CA",
+  "ca": {
+    "expiry": "175200h"
+  },
+  "key": {
+    "algo": "ecdsa",
+    "size": 384
+  }
+}
