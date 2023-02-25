@@ -1,5 +1,11 @@
 {
   "CN": "__NAMESPACE__ MongoDB Replication Private CA",
+  "names": [
+    {
+      "O": "__NAMESPACE__",
+      "OU": "__NAMESPACE__ MongoDB Replication"
+    }
+  ],
   "ca": {
     "expiry": "175200h"
   },

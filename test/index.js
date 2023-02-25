@@ -3,7 +3,7 @@ const path = require("path");
 const mongoose = require("mongoose").default;
 const { faker } = require("@faker-js/faker");
 mongoose.set("strictQuery", true);
-mongoose.set("debug", true);
+mongoose.set("debug", process.env.DEBUG === 'true');
 
 const { Schema } = mongoose;
 
@@ -39,8 +39,6 @@ const { log } = console;
     tlsInsecure: false,
   });
 
-  log("init success, try to down and up nodes...");
-
   [
     "close",
     "connected",
@@ -64,9 +62,38 @@ const { log } = console;
     const doc = new Sample();
     doc.title = faker.lorem.paragraph();
     doc.save();
-  }, 666);
+  // lower insert time for check changes between primary and secondary
+  }, 100);
 
   setInterval(async () => {
-    await Sample.findOne({ title: /e/i });
+    await Sample.findOne({ title: /e/i }, undefined, {
+      readPreference: 'primary',
+    });
+
+    await Sample.findOne({ title: /e/i }, undefined, {
+      readPreference: 'secondary',
+    });
+
+    const counts = [
+      Sample.aggregate([
+        {
+          $count: "total"
+        }
+      ], {
+        readPreference: 'primary',
+      }),
+      Sample.aggregate([
+        {
+          $count: "total"
+        }
+      ], {
+        readPreference: 'secondary',
+      })
+    ];
+
+    const r = (await Promise.all(counts)).map(i => i[0].total );
+
+    log({ primary: r[0], secondary: r[1], diff: r[0] !== r[1] });
+
   }, 333);
 })();

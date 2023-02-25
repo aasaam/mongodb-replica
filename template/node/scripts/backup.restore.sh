@@ -19,7 +19,16 @@ if [ ! -f $BACKUP_FILE ]; then
   exit 1
 fi
 
-read -p "old database will be drop and backups will be replaces? [y] " -n 1 -r
+echo "make sure your application is in readonly or down, for data integrity"
+read -p "is application down or read only ? [y] " -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  echo "application confirm is down or readonly..."
+else
+  echo "skipped"
+  exit 0
+fi
+
+read -p "old database will be drop and backups will be replaces, latest confirmation? [y] " -n 1 -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "start restoring..."
 else
@@ -29,8 +38,7 @@ fi
 
 echo "drop old database..."
 mongosh --eval "use $DBNAME; db.dropDatabase()" --username root --password __ROOT_PASSWORD__ --port __NODE_MONGO_PORT__ --host 127.0.0.1 --tls --tlsCAFile /cert/ca.pem --tlsCertificateKeyFile /cert/client-combined.pem
-sleep 5
 
 echo "restoring..."
-mongorestore --drop --db=$DBNAME --authenticationDatabase admin --username root --password __ROOT_PASSWORD__ --uri="mongodb://__NAMESPACE__-mongo-0.__DOMAIN__:__NODE0_MONGO_PORT__,__NAMESPACE__-mongo-1.__DOMAIN__:__NODE1_MONGO_PORT__,__NAMESPACE__-mongo-2.__DOMAIN__:__NODE2_MONGO_PORT__/?tls=true&tlsCertificateKeyFile=/cert/client-combined.pem&tlsCAFile=/cert/ca.pem&replicaSet=__NAMESPACE__" --gzip --archive=$BACKUP_FILE
+mongorestore --drop --db=$DBNAME --authenticationDatabase admin --username root --password __ROOT_PASSWORD__ --uri="mongodb://__HOSTS_PORTS__/?tls=true&tlsCertificateKeyFile=/cert/client-combined.pem&tlsCAFile=/cert/ca.pem&replicaSet=__NAMESPACE__" --gzip --archive=$BACKUP_FILE
 

@@ -18,18 +18,18 @@ fi
 BACKUP_FILE="/backup/mongo-__NAMESPACE__-$DBNAME-full-$DATE_PATTERN.tgz"
 
 if [ ! -f $BACKUP_FILE ]; then
-  # prevent paraller backups
-  echo '1' > $BACKUP_FILE
-  sleep 5
-  sleep $((RANDOM % 10))
+  echo "$(date +"%Y-%m-%dT%H:%M:%S%z")  INFRASTRUCTURE_BACKUP_OPRATION: mongo replication backup $BACKUP_FILE created for database $DBNAME; compressed size is $BACKUP_FILE_SIZE"
 
+  START_TIME=$(date +%s)
   # create backup
-  mongodump --db=$DBNAME --authenticationDatabase admin --username root --password __ROOT_PASSWORD__ --uri="mongodb://__NAMESPACE__-mongo-0.__DOMAIN__:__NODE0_MONGO_PORT__,__NAMESPACE__-mongo-1.__DOMAIN__:__NODE1_MONGO_PORT__,__NAMESPACE__-mongo-2.__DOMAIN__:__NODE2_MONGO_PORT__/?tls=true&tlsCertificateKeyFile=/cert/client-combined.pem&tlsCAFile=/cert/ca.pem&replicaSet=__NAMESPACE__&readPreference=secondary" --gzip --archive=$BACKUP_FILE
+  mongodump --db=$DBNAME --authenticationDatabase admin --username root --password __ROOT_PASSWORD__ --uri="mongodb://__HOSTS_PORTS__/?tls=true&tlsCertificateKeyFile=/cert/client-combined.pem&tlsCAFile=/cert/ca.pem&replicaSet=__NAMESPACE__" --gzip --archive=$BACKUP_FILE
+  END_TIME=$(date +%s)
+  PROCESS_TIME=$(($END_TIME-$START_TIME))
 
   # log
   BACKUP_FILE_SIZE=$(ls -lh $BACKUP_FILE | awk '{print $5}')
-  echo "mongo replication backup $BACKUP_FILE created for database $DBNAME; compressed size is $BACKUP_FILE_SIZE"
+  echo "$(date +"%Y-%m-%dT%H:%M:%S%z")  INFRASTRUCTURE_BACKUP_OPRATION: mongo replication backup $BACKUP_FILE created in $PROCESS_TIME seconds for database $DBNAME; compressed size is $BACKUP_FILE_SIZE"
 else
   # log
-  echo "mongo replication backup $BACKUP_FILE exist for database $DBNAME; skipped"
+  echo "$(date +"%Y-%m-%dT%H:%M:%S%z")  INFRASTRUCTURE_BACKUP_OPRATION: mongo replication backup $BACKUP_FILE exist for database $DBNAME; skipped"
 fi

@@ -3,13 +3,13 @@
 set -e
 
 APPNAME=$1
-SUFFIX=$(tr -dc a-z0-9 </dev/urandom | head -c 10 ; echo '')
+SUFFIX=$(openssl rand -base64 128 | tr -dc a-z0-9 | head -c 8 ; echo '')
 APPPREFIX=$APPNAME-$SUFFIX
 USERNAME_ADMIN="ua-${APPPREFIX}"
 USERNAME_READONLY="ur-${APPPREFIX}"
 DATABASE="db-${APPPREFIX}"
-ADMIN_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32 ; echo '')
-READONLY_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32 ; echo '')
+ADMIN_PASSWORD=$(openssl rand -base64 64 | tr -dc A-Za-z0-9 | head -c 48 ; echo '')
+READONLY_PASSWORD=$(openssl rand -base64 64 | tr -dc A-Za-z0-9 | head -c 48 ; echo '')
 
 if [[ "$APPNAME" =~ ^[a-z][a-z0-9]{2,15}$ ]]; then
   echo "your application prefix is $APPPREFIX"
@@ -21,7 +21,9 @@ if [[ "$APPNAME" =~ ^[a-z][a-z0-9]{2,15}$ ]]; then
   echo "readonly pass:  $READONLY_PASSWORD"
   echo "connection string will be:"
   echo ""
-  echo "mongodb://$USERNAME_ADMIN:$ADMIN_PASSWORD@__NAMESPACE__-mongo-0.__DOMAIN__:__NODE0_MONGO_PORT__,__NAMESPACE__-mongo-1.__DOMAIN__:__NODE1_MONGO_PORT__,__NAMESPACE__-mongo-2.__DOMAIN__:__NODE2_MONGO_PORT__/$DATABASE?replicaSet=__NAMESPACE__"
+  echo "mongodb://$USERNAME_ADMIN:$ADMIN_PASSWORD@__HOSTS_PORTS__/$DATABASE?replicaSet=__NAMESPACE__"
+  echo ""
+  echo "also you will need cert files(.pem) include in 'client-cert' for establish tls communication"
   echo ""
   read -p "Confirm? [y] " -n 1 -r
   if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -55,7 +57,7 @@ db.createUser({
     { role: 'read', db: '$DATABASE' },
   ],
 });
-db.init_tmp_collection_$SUFFIX.insert({_id: new ObjectId(\"000000000000000000000000\")});
+db.tmp_init_collection_you_can_remove_$SUFFIX.insert({_id: new ObjectId(\"000000000000000000000000\")});
 quit();
 " > $TMPFILE
 

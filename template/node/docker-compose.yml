@@ -6,23 +6,24 @@ services:
   __NAMESPACE__-mongo-__NODE_ID__-nginx:
     image: nginx:1-alpine
     container_name: __NAMESPACE__-mongo-__NODE_ID__-nginx
-
+    restart: always
     ports:
       - "__NODE_MONGO_PORT__:__NODE_MONGO_PORT__" # mongo
+      # for cdn based access
 
     volumes:
-      - ./cert:/cert:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/default.conf:/etc/nginx/templates/default.conf.template:ro
-      - ./nginx/http.conf:/http.conf:ro
       - ./nginx/acl.conf:/acl.conf:ro
 
     environment:
+      - ASM_MONGO_NGINX_ACCESS_LOG_COMMENT=${ASM_MONGO_NGINX_ACCESS_LOG_COMMENT:-}
+      - ASM_MONGO_NGINX_EXPOSER_LOG_LEVEL=${ASM_MONGO_NGINX_EXPOSER_LOG_LEVEL:-warn}
       - ASM_MONGO_NGINX_EXPOSER_RESOLVER_COMMENT=${ASM_MONGO_NGINX_EXPOSER_RESOLVER_COMMENT:-#}
       - ASM_MONGO_NGINX_EXPOSER_RESOLVER_VALUE=${ASM_MONGO_NGINX_EXPOSER_RESOLVER_VALUE:-1.1.1.1 8.8.8.8 9.9.9.9 valid=300 ipv6=off}
-      - ASM_MONGO_NGINX_EXPOSER_WORKER_PROCESSES=${ASM_MONGO_NGINX_EXPOSER_WORKER_PROCESSES:-auto}
-      - ASM_MONGO_NGINX_EXPOSER_LOG_LEVEL=${ASM_MONGO_NGINX_EXPOSER_LOG_LEVEL:-warn}
       - ASM_MONGO_NGINX_EXPOSER_WORKER_CONNECTIONS=${ASM_MONGO_NGINX_EXPOSER_WORKER_CONNECTIONS:-4096}
+      - ASM_MONGO_NGINX_EXPOSER_WORKER_PROCESSES=${ASM_MONGO_NGINX_EXPOSER_WORKER_PROCESSES:-auto}
+      # do not touch
       - ASM_MONGO_NGINX_EXPOSER_MONGO_PORT=__NODE_MONGO_PORT__
       - ASM_MONGO_NGINX_EXPOSER_MONGO_CONTAINER=__NAMESPACE__-mongo-__NODE_ID__
 
@@ -47,7 +48,7 @@ services:
     image: mongo:6.0
     container_name: __NAMESPACE__-mongo-__NODE_ID__
     hostname: __NAMESPACE__-mongo-__NODE_ID__.__DOMAIN__
-    entrypoint: mongod --quiet --port __NODE_MONGO_PORT__ --bind_ip_all --auth --replSet __REPLICA_NAME__ --profile 1 --slowms 1000 --enableFreeMonitoring off --tlsMode requireTLS --tlsCAFile /cert/ca.pem --tlsCertificateKeyFile /cert/server-combined.pem --clusterAuthMode x509
+    entrypoint: mongod --port __NODE_MONGO_PORT__ --bind_ip_all --auth --replSet __REPLICA_NAME__ --profile 1 --slowms 1000 --enableFreeMonitoring off --tlsMode requireTLS --tlsCAFile /cert/ca.pem --tlsCertificateKeyFile /cert/server-combined.pem --clusterAuthMode x509
     restart: always
     # ports:
     #   - __NODE_MONGO_PORT__:__NODE_MONGO_PORT__
@@ -61,8 +62,20 @@ services:
       driver: "journald"
       options:
         tag: "APP=__NAMESPACE__-mongo-replica TYPE=mongo NODE_ID=__NODE_ID__"
-    # manually added ip host
+    # manually added ip host withoud global dns servers, NOT RECOMMENDED
     # extra_hosts:
-    #   __NAMESPACE__-mongo-0.__DOMAIN__: 192.168.0.1
-    #   __NAMESPACE__-mongo-1.__DOMAIN__: 192.168.0.2
-    #   __NAMESPACE__-mongo-2.__DOMAIN__: 192.168.0.3
+    #   __NAMESPACE__-mongo-0.__DOMAIN__: 192.168.0.100 # 3NODEREPLICA:N0
+    #   __NAMESPACE__-mongo-1.__DOMAIN__: 192.168.0.101 # 3NODEREPLICA:N1
+    #   __NAMESPACE__-mongo-2.__DOMAIN__: 192.168.0.102 # 3NODEREPLICA:N2
+    #   __NAMESPACE__-mongo-0.__DOMAIN__: 192.168.0.100 # 5NODEREPLICA:N0
+    #   __NAMESPACE__-mongo-1.__DOMAIN__: 192.168.0.101 # 5NODEREPLICA:N1
+    #   __NAMESPACE__-mongo-2.__DOMAIN__: 192.168.0.102 # 5NODEREPLICA:N2
+    #   __NAMESPACE__-mongo-3.__DOMAIN__: 192.168.0.103 # 5NODEREPLICA:N3
+    #   __NAMESPACE__-mongo-4.__DOMAIN__: 192.168.0.104 # 5NODEREPLICA:N4
+    #   __NAMESPACE__-mongo-0.__DOMAIN__: 192.168.0.100 # 7NODEREPLICA:N0
+    #   __NAMESPACE__-mongo-1.__DOMAIN__: 192.168.0.101 # 7NODEREPLICA:N1
+    #   __NAMESPACE__-mongo-2.__DOMAIN__: 192.168.0.102 # 7NODEREPLICA:N2
+    #   __NAMESPACE__-mongo-3.__DOMAIN__: 192.168.0.103 # 7NODEREPLICA:N3
+    #   __NAMESPACE__-mongo-4.__DOMAIN__: 192.168.0.104 # 7NODEREPLICA:N4
+    #   __NAMESPACE__-mongo-5.__DOMAIN__: 192.168.0.105 # 7NODEREPLICA:N5
+    #   __NAMESPACE__-mongo-6.__DOMAIN__: 192.168.0.106 # 7NODEREPLICA:N6
