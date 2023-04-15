@@ -41,4 +41,3 @@ mongosh --eval "use $DBNAME; db.dropDatabase()" --username root --password __ROO
 
 echo "restoring..."
 mongorestore --drop --db=$DBNAME --authenticationDatabase admin --username root --password __ROOT_PASSWORD__ --uri="mongodb://__HOSTS_PORTS__/?tls=true&tlsCertificateKeyFile=/cert/client-combined.pem&tlsCAFile=/cert/ca.pem&replicaSet=__NAMESPACE__" --gzip --archive=$BACKUP_FILE
-
