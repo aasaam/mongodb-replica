@@ -9,7 +9,6 @@ services:
     restart: always
     ports:
       - "__NODE_MONGO_PORT__:__NODE_MONGO_PORT__" # mongo
-      # for cdn based access
 
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -20,7 +19,7 @@ services:
       - ASM_MONGO_NGINX_ACCESS_LOG_COMMENT=${ASM_MONGO_NGINX_ACCESS_LOG_COMMENT:-}
       - ASM_MONGO_NGINX_EXPOSER_LOG_LEVEL=${ASM_MONGO_NGINX_EXPOSER_LOG_LEVEL:-warn}
       - ASM_MONGO_NGINX_EXPOSER_RESOLVER_COMMENT=${ASM_MONGO_NGINX_EXPOSER_RESOLVER_COMMENT:-#}
-      - ASM_MONGO_NGINX_EXPOSER_RESOLVER_VALUE=${ASM_MONGO_NGINX_EXPOSER_RESOLVER_VALUE:-1.1.1.1 8.8.8.8 9.9.9.9 valid=300 ipv6=off}
+      - ASM_MONGO_NGINX_EXPOSER_RESOLVER_VALUE=${ASM_MONGO_NGINX_EXPOSER_RESOLVER_VALUE:-1.1.1.1 8.8.8.8 9.9.9.9 valid=600 ipv6=off}
       - ASM_MONGO_NGINX_EXPOSER_WORKER_CONNECTIONS=${ASM_MONGO_NGINX_EXPOSER_WORKER_CONNECTIONS:-4096}
       - ASM_MONGO_NGINX_EXPOSER_WORKER_PROCESSES=${ASM_MONGO_NGINX_EXPOSER_WORKER_PROCESSES:-auto}
       # do not touch
@@ -34,7 +33,7 @@ services:
 
   # mongodb_exporter
   __NAMESPACE__-mongo__NODE_ID__-exporter:
-    image: percona/mongodb_exporter:0.37
+    image: percona/mongodb_exporter:2.37-amd64
     container_name: __NAMESPACE__-mongo__NODE_ID__-exporter
     entrypoint: /mongodb_exporter --collector.diagnosticdata --collector.replicasetstatus --collector.dbstats --collector.topmetrics --collector.indexstats --collector.collstats --web.listen-address="0.0.0.0:__NODE_X_EXPORTER_PORT__" --mongodb.uri="mongodb://root_readonly:__ROOT_READONLY_PASSWORD__@__NAMESPACE__-mongo-__NODE_ID__.__DOMAIN__:__NODE_MONGO_PORT__/admin?tls=true&tlsCertificateKeyFile=/cert/server-combined.pem&tlsCAFile=/cert/ca.pem"
     restart: always

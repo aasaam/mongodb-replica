@@ -3,7 +3,7 @@ const path = require("path");
 const mongoose = require("mongoose").default;
 const { faker } = require("@faker-js/faker");
 mongoose.set("strictQuery", true);
-mongoose.set("debug", process.env.DEBUG === 'true');
+mongoose.set("debug", process.env.DEBUG === "true");
 
 const { Schema } = mongoose;
 
@@ -23,7 +23,6 @@ const [clientCertPath, connectionString] = process.argv.slice(2);
 const { log } = console;
 
 (async () => {
-  log(faker.lorem.paragraph());
   const mongooseConnection = await mongoose.connect(connectionString, {
     socketTimeoutMS: 1000,
     connectTimeoutMS: 1000,
@@ -62,38 +61,43 @@ const { log } = console;
     const doc = new Sample();
     doc.title = faker.lorem.paragraph();
     doc.save();
-  // lower insert time for check changes between primary and secondary
+    // lower insert time for check changes between primary and secondary
   }, 100);
 
   setInterval(async () => {
     await Sample.findOne({ title: /e/i }, undefined, {
-      readPreference: 'primary',
+      readPreference: "primary",
     });
 
     await Sample.findOne({ title: /e/i }, undefined, {
-      readPreference: 'secondary',
+      readPreference: "secondary",
     });
 
     const counts = [
-      Sample.aggregate([
+      Sample.aggregate(
+        [
+          {
+            $count: "total",
+          },
+        ],
         {
-          $count: "total"
+          readPreference: "primary",
         }
-      ], {
-        readPreference: 'primary',
-      }),
-      Sample.aggregate([
+      ),
+      Sample.aggregate(
+        [
+          {
+            $count: "total",
+          },
+        ],
         {
-          $count: "total"
+          readPreference: "secondary",
         }
-      ], {
-        readPreference: 'secondary',
-      })
+      ),
     ];
 
-    const r = (await Promise.all(counts)).map(i => i[0].total );
+    const r = (await Promise.all(counts)).map((i) => i[0].total);
 
     log({ primary: r[0], secondary: r[1], diff: r[0] !== r[1] });
-
   }, 333);
 })();

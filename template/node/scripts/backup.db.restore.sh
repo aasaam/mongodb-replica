@@ -19,16 +19,16 @@ if [ ! -f $BACKUP_FILE ]; then
   exit 1
 fi
 
-echo "make sure your application is in readonly or down, for data integrity"
-read -p "is application down or read only ? [y] " -n 1 -r
+echo "make sure your application is in readonly, down or ready for restore(for data integrity)"
+read -p "is application ready ? [y] " -n 1 -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-  echo "application confirm is down or readonly..."
+  echo "application is ready for restore data..."
 else
   echo "skipped"
   exit 0
 fi
 
-read -p "old database will be drop and backups will be replaces, latest confirmation? [y] " -n 1 -r
+read -p "are you sure for restore data, latest confirmation? [y] " -n 1 -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "start restoring..."
 else

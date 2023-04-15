@@ -94,3 +94,31 @@ MongoDB replication __NAMESPACE__
       db.changeUserPassword("username", "newPassword")
       // or via prompt [ not recommended ]
       db.changeUserPassword("username", passwordPrompt())
+
+- Cron
+
+  * Create cron entry for backup and garbage collection:
+
+    cron.sh [db-full-backup-list] [db-collection-list-backup-daily] [max-load-average-for-start-backup]
+
+      db-full-backup-list:
+        List of `database` name separated by commas.
+
+      db-collection-list-backup-daily:
+        List of `database.collection` name separated by commas.
+
+      max-load-average-for-start-backup:
+        max-load-average-for-start-backup for cron.sh execution.
+        Default is `2,4,6`, load 1, 5 and 15 minutes.
+
+    Sample:
+
+      0 * * * * /path/to/node/cron.sh 'db-sample-abcdef01,db-sample-abcdef02' 'db-sample-abcdef01.myCollection' '10,20,25'
+
+      Run every-1-hour
+        If load average is under `10,20,25`
+        backup for check full daily backup on databases:
+          - db-sample-abcdef01
+          - db-sample-abcdef02
+        also backup collection daily
+          - db-sample-abcdef01.myCollection

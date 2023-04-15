@@ -40,9 +40,10 @@ fi
 TMPFILE=$(mktemp /tmp/create-db.XXXXXX.js)
 
 echo "
+disableTelemetry();
 use $DATABASE;
 disableTelemetry();
-db.setProfilingLevel(1, { slowms: 1000, sampleRate: 0.33 })
+db.setProfilingLevel(1, { slowms: 1000, sampleRate: 0.33 });
 db.createUser({
   user: '$USERNAME_ADMIN',
   pwd: '$ADMIN_PASSWORD',
@@ -57,8 +58,7 @@ db.createUser({
     { role: 'read', db: '$DATABASE' },
   ],
 });
-db.tmp_init_collection_you_can_remove_$SUFFIX.insert({_id: new ObjectId(\"000000000000000000000000\")});
-quit();
+db.tmpInitCollectionYouCanRemove_$SUFFIX.insert({_id: new ObjectId()});
 " > $TMPFILE
 
 cat $TMPFILE | mongosh --username root --password __ROOT_PASSWORD__ --port __NODE_MONGO_PORT__ --host 127.0.0.1 --tls --tlsCAFile /cert/ca.pem --tlsCertificateKeyFile /cert/client-combined.pem

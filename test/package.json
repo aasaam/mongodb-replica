@@ -1,10 +1,10 @@
 {
   "name": "test",
   "version": "1.0.0",
-  "description": "",
+  "private": true,
   "main": "index.js",
   "dependencies": {
     "@faker-js/faker": "^7",
-    "mongoose": "^6"
+    "mongoose": "^7"
   }
 }

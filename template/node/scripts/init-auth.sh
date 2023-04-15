@@ -8,6 +8,7 @@ echo "
 disableTelemetry();
 
 use admin;
+disableTelemetry();
 db.createUser({
   user: 'root',
   pwd: '__ROOT_PASSWORD__',

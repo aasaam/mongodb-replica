@@ -2,6 +2,11 @@
 
 set -e
 
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
 NOCOLOR='\033[0m'
 RED='\033[0;31m'
 PURPLE='\033[0;35m'
