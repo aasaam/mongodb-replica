@@ -47,8 +47,8 @@ __HOSTS_PORTS__=$(IFS=, ; echo "${HOSTS_PORTS_TEMPLATE[*]}")
 
 if [ ! -f ./cfssl ]; then
   echo "cfssl not exist try to download"
-  wget -O /tmp/cfssl 'https://github.com/cloudflare/cfssl/releases/download/v1.6.3/cfssl_1.6.3_linux_amd64'
-  wget -O /tmp/cfssljson 'https://github.com/cloudflare/cfssl/releases/download/v1.6.3/cfssljson_1.6.3_linux_amd64'
+  wget -O /tmp/cfssl 'https://github.com/cloudflare/cfssl/releases/download/v1.6.4/cfssl_1.6.4_linux_amd64'
+  wget -O /tmp/cfssljson 'https://github.com/cloudflare/cfssl/releases/download/v1.6.4/cfssljson_1.6.4_linux_amd64'
   mv /tmp/cfssl ./cfssl
   mv /tmp/cfssljson ./cfssljson
   chmod +x ./cfssl
@@ -157,7 +157,7 @@ do
     rm -rf $NODE_PATH/scripts/ini*.sh
   fi
 
-  for FILE_TO_REPLACE in $(find $NODE_PATH -type f -regex ".*\.\(txt\|sh\|js\|yml\|conf\)"); do
+  for FILE_TO_REPLACE in $(find $NODE_PATH -type f -regex ".*\.\(txt\|sh\|js\|yml\|sample\|conf\)"); do
     sed -i -e "s/__HOSTS_PORTS__/$__HOSTS_PORTS__/g" $FILE_TO_REPLACE
 
     sed -i -e "s/__NAMESPACE__/$__NAMESPACE__/g" $FILE_TO_REPLACE
@@ -194,5 +194,6 @@ do
 
   done
 
+  mv $NODE_PATH/env.sample $NODE_PATH/.env
   find $NODE_PATH -type f -name ".gitkeep" -delete
 done
