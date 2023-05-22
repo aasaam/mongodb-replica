@@ -2,16 +2,14 @@
 
 set -e
 
-APPNAME=$1
-SUFFIX=$(openssl rand -base64 128 | tr -dc a-z0-9 | head -c 8 ; echo '')
-APPPREFIX=$APPNAME-$SUFFIX
+APPPREFIX=$1
 USERNAME_ADMIN="ua-${APPPREFIX}"
 USERNAME_READONLY="ur-${APPPREFIX}"
 DATABASE="db-${APPPREFIX}"
 ADMIN_PASSWORD=$(openssl rand -base64 64 | tr -dc A-Za-z0-9 | head -c 48 ; echo '')
 READONLY_PASSWORD=$(openssl rand -base64 64 | tr -dc A-Za-z0-9 | head -c 48 ; echo '')
 
-if [[ "$APPNAME" =~ ^[a-z][a-z0-9]{2,15}$ ]]; then
+if [[ "$APPPREFIX" =~ ^[a-z][a-z0-9\-]{2,29}$ ]]; then
   echo "your application prefix is $APPPREFIX"
   echo "copy these for later use it's not shown again:"
   echo "database:       $DATABASE"
@@ -33,7 +31,7 @@ if [[ "$APPNAME" =~ ^[a-z][a-z0-9]{2,15}$ ]]; then
     exit 0
   fi
 else
-  echo "invalid application name must be ^[a-z][a-z0-9]{3,15}$"
+  echo "invalid application name must be ^[a-z][a-z0-9\-]{2,29}$"
   exit 1
 fi
 
@@ -58,7 +56,7 @@ db.createUser({
     { role: 'read', db: '$DATABASE' },
   ],
 });
-db.tmpInitCollectionYouCanRemove_$SUFFIX.insert({_id: new ObjectId()});
+db.temporaryInitializeCollectionThatYouCanRemove.insert({_id: new ObjectId()});
 " > $TMPFILE
 
 cat $TMPFILE | mongosh --username root --password __ROOT_PASSWORD__ --port __NODE_MONGO_PORT__ --host 127.0.0.1 --tls --tlsCAFile /cert/ca.pem --tlsCertificateKeyFile /cert/client-combined.pem

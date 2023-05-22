@@ -9,6 +9,16 @@ __DOMAIN__=$2
 __NODES__=$3
 __INIT_PORT__=$4
 
+if [ -z "$__NAMESPACE__" ]; then
+  echo "invalid namespace"
+  exit 1
+fi
+
+if [ -z "$__DOMAIN__" ]; then
+  echo "invalid cluster domain"
+  exit 1
+fi
+
 if [ -z "$__NODES__" ]; then
   __NODES__=3
 fi
@@ -97,8 +107,8 @@ do
   OUT_DIR=$DIST_PATH/cert/node${NODE_ID}
   mkdir -p $OUT_DIR
 
-  cat ca.pem client.pem > $OUT_DIR/client-fullchain.pem
-  cat ca.pem server.pem > $OUT_DIR/server-fullchain.pem
+  cat client.pem ca.pem > $OUT_DIR/client-fullchain.pem
+  cat server.pem ca.pem > $OUT_DIR/server-fullchain.pem
   cat client-key.pem client.pem > $OUT_DIR/client-combined.pem
   cat server-key.pem server.pem > $OUT_DIR/server-combined.pem
 
@@ -114,8 +124,8 @@ done
 $CFSSl gencert -ca ca.pem -ca-key ca-key.pem -config ca-config.json -profile=client csr-client.json | $CFSSLJSON -bare client
 CLIENT_CERT_DIR=$DIST_PATH/cert/client
 mkdir -p $CLIENT_CERT_DIR
-cat ca.pem client.pem > $CLIENT_CERT_DIR/client-fullchain.pem
-cat client-key.pem ca.pem client.pem > $CLIENT_CERT_DIR/client-combined-fullchain.pem
+cat client.pem ca.pem > $CLIENT_CERT_DIR/client-fullchain.pem
+cat client-key.pem client.pem ca.pem  > $CLIENT_CERT_DIR/client-combined-fullchain.pem
 cat client-key.pem client.pem > $CLIENT_CERT_DIR/client-combined.pem
 cp ca.pem $CLIENT_CERT_DIR/
 mv client-key.pem $CLIENT_CERT_DIR/

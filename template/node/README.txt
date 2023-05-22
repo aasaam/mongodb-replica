@@ -58,9 +58,21 @@ MongoDB replication __NAMESPACE__
 
 - Addition tools:
 
+
   * Create database with user and connection string:
 
-    ./create-db-user.sh app1
+    First create name space for your application, for example
+
+      python3 ./namespace.py --url="https://www.example.com"
+
+      example-com-dev-c919 # for development environment
+      example-com-tst-c919 # for testing environment
+      example-com-stg-c919 # for production staging environment
+      example-com-prd-c919 # for production environment
+
+    You can use application namespace for create database and user.
+
+    ./create-db-user.sh example-com-dev-sbh67q
 
   * Access shell
 
@@ -96,6 +108,14 @@ MongoDB replication __NAMESPACE__
       db.changeUserPassword("username", passwordPrompt())
 
 - Cron
+
+  * For all database daily backup
+
+    cron-all-db-daily.sh [max-load-average-for-start-backup]
+
+      max-load-average-for-start-backup:
+        max-load-average-for-start-backup for cron.sh execution.
+        Default is `2,4,6`, load 1, 5 and 15 minutes.
 
   * Create cron entry for backup and garbage collection:
 

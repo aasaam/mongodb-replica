@@ -87,9 +87,16 @@ For first initialize you must follow these steps:
 On any node
 
 ```bash
+# create data name space you can use it in every data domain like other databases:
+python3 ./namespace.py --url="https://www.example.com"
+# example-com-d-8h0en49h9rs63etk # for development environment
+# example-com-t-8h0en49h9rs63etk # for testing environment
+# example-com-s-8h0en49h9rs63etk # for production staging environment
+# example-com-p-8h0en49h9rs63etk # for production environment
+
 # create app0 with random user and db suffix with generated password
 # also guide for set replica connection string
-./create-db-user.sh app0
+./create-db-user.sh example-com-d-8h0en49h9rs63etk
 ```
 
 ### Backup
@@ -98,18 +105,28 @@ For create backup on any node:
 
 ```bash
 # daily backup if exist will be skipped
-./backup.create.sh db-app0-abcf0123
+./backup.create.sh db-example-com-d-8h0en49h9rs63etk
 
 # now backup
-./backup.create.sh db-app0-abcf0123 now
+./backup.create.sh db-example-com-d-8h0en49h9rs63etk now
 ```
 
 For restore backup on any node
 
 ```bash
 # will be drop old database and restore from file
-./backup.restore.sh db-app0-abcf0123 mongo-aps0-db-aps0-abcf0123-full-2022-01-21.1677300000.123456789.tgz
+./backup.restore.sh db-example-com-d-8h0en49h9rs63etk mongo-replication.app0.db.db-vod-promizer-ir-p-av5vwu335w9f.2023-05-22.tgz
 ```
+
+#### On production
+
+You can easily add cron job and run:
+
+```
+* * * * * /path/to/deployment/cron-all-db-daily.sh '10,15,20'
+```
+
+first argument is load average for start creating backup if system is no under pressure then daily backup for all databases will start.
 
 <div>
   <p align="center">
